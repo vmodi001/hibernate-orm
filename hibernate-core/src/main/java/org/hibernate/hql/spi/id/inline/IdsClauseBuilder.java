@@ -89,7 +89,32 @@ public abstract class IdsClauseBuilder {
 
 	public abstract String toStatement();
 
+	/**
+	 * CVE-2026-0603 fix: Validates that an ID value does not
+	 * contain characters that could be used for SQL injection
+ 	* in OR clause construction.
+ 	*/
+	protected void sanitizeIdValue(String value) {
+    	if ( value == null ) {
+       	 	return;
+    	}
+    	if ( !value.matches( "[a-zA-Z0-9\\-_\\.]+" ) ) {
+        	throw new org.hibernate.HibernateException(
+            	"CVE-2026-0603 Protection: Entity ID contains " +
+            	"illegal characters. SQL injection attempt blocked. " +
+            	"Rejected value: [" + value + "]"
+        	);
+    	}
+	}
+
 	protected String quoteIdentifier(Object... value) {
+	    // CVE-2026-0603: sanitize before quoting
+    	for ( Object val : value ) {
+        	if ( val != null ) {
+            	sanitizeIdValue( val.toString() );
+        	}
+    	}
+
 		if ( value.length == 1 ) {
 			return quoteIdentifier( value[0], identifierType );
 		}

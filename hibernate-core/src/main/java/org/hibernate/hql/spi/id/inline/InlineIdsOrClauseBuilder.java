@@ -23,6 +23,28 @@ public class InlineIdsOrClauseBuilder extends IdsClauseBuilder {
 	public InlineIdsOrClauseBuilder(
 			Dialect dialect, Type identifierType, TypeResolver typeResolver, String[] columns, List<Object[]> ids) {
 		super( dialect, identifierType, typeResolver, columns, ids );
+		// CVE-2026-0603: validate all IDs at construction time
+    		validateIds( ids );
+	}
+
+	/**
+ 	* CVE-2026-0603 fix: Validate all ID values before
+ 	* building OR clause to prevent SQL injection.
+ 	*/
+	private void validateIds(List<Object[]> ids) {
+    		if ( ids == null ) {
+        	return;
+    		}
+    		for ( Object[] idValues : ids ) {
+        		if ( idValues == null ) {
+            		continue;
+        	}
+        	for ( Object idValue : idValues ) {
+            		if ( idValue != null ) {
+               	 	sanitizeIdValue( idValue.toString() );
+        	    		}
+        		}
+    		}
 	}
 
 	@Override
