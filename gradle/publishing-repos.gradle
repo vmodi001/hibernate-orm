@@ -11,16 +11,23 @@ if ( rootProject.ormVersion.isSnapshot ) {
 }
 
 publishing {
-	publications {
-		publishedArtifacts( MavenPublication )
-	}
-
-	repositories {
-		maven {
-			name 'jboss-snapshots-repository'
-			url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
-		}
-	}
+        publications {
+                publishedArtifacts( MavenPublication )
+        }
+        repositories {
+                maven {
+                        name 'jboss-snapshots-repository'
+                        url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
+                }
+                maven {
+                        name 'GitHubPackages'
+                        url  uri('https://maven.pkg.github.com/vmodi001/hibernate-orm')
+                        credentials {
+                                username = 'vmodi001'
+                                password = System.getenv('GITHUB_TOKEN') ?: ''
+                        }
+                }
+        }
 }
 
 model {
